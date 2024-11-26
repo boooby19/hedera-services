@@ -292,4 +292,31 @@ class FileOpsUsageTest {
                 .setFileUpdate(updateOp)
                 .build();
     }
+
+    @Test
+    void testEstimatesEmptyUpdateAsExpected() {
+        // setup:
+        final long oldExpiry = expiry - 1_234L;
+        final byte[] oldContents = "Archiac".getBytes();
+        final KeyList oldWacl = KeyUtils.A_KEY_LIST.getKeyList();
+        final String oldMemo = "Lettuce";
+
+        givenEmptyUpdateOp();
+        // and:
+        final var ctx = ExtantFileContext.newBuilder()
+                .setCurrentExpiry(oldExpiry)
+                .setCurrentMemo(oldMemo)
+                .setCurrentWacl(oldWacl)
+                .setCurrentSize(oldContents.length)
+                .build();
+
+        // when:
+        final var estimate = subject.fileUpdateUsage(txn, sigUsage, ctx);
+
+        // then:
+        assertEquals(A_USAGES_MATRIX, estimate);
+        // and:
+        verify(base).addBpt(BASIC_ENTITY_ID_SIZE + LONG_SIZE);
+        verify(base, never()).addSbs(0L);
+    }
 }

@@ -75,4 +75,18 @@ class CryptoCreateMetaTest {
         assertEquals(subject1, subject2);
         assertEquals(subject1.hashCode(), subject2.hashCode());
     }
+
+    @Test
+    void testCreatingCryptoAsExpected() {
+        final var cryptoCreateTxnBody = CryptoCreateTransactionBody.newBuilder()
+                .setMemo("Lettuce")
+                .setAutoRenewPeriod(Duration.newBuilder().setSeconds(7776001L))
+                .setKey(key)
+                .baseSize(1_234)
+                .build();
+
+        final var subject = new CryptoCreateMeta(cryptoCreateTxnBody);
+
+        assertEquals(1_234, subject.getBaseSize());
+    }
 }

@@ -215,6 +215,48 @@ class TokenOpsUsageUtilsTest {
         assertEquals(32, tokenCreateMeta.getCustomFeeScheduleSize());
     }
 
+    @Test
+    void testTokenCreateWithAutoRenewAcctNoCustomFeeKeyNoCustomFeesWorks() {
+        final var txn = givenTokenCreateWith(NON_FUNGIBLE_UNIQUE, false, false, true, false);
+
+        final var tokenCreateMeta = TOKEN_OPS_USAGE_UTILS.tokenCreateUsageFrom(txn);
+
+        assertEquals(1062, tokenCreateMeta.getBaseSize());
+        assertEquals(1_234_567L, tokenCreateMeta.getLifeTime());
+        assertEquals(TOKEN_NON_FUNGIBLE_UNIQUE, tokenCreateMeta.getSubType());
+        assertEquals(1, tokenCreateMeta.getNumTokens());
+        assertEquals(0, tokenCreateMeta.getNftsTransfers());
+        assertEquals(0, tokenCreateMeta.getCustomFeeScheduleSize());
+    }
+
+    @Test
+    void testTokenCreateWithOutAutoRenewAcctAndCustomFeeKeyNoCustomFeesWorks() {
+        final var txn = givenTokenCreateWith(NON_FUNGIBLE_UNIQUE, true, false, true, false);
+
+        final TokenCreateMeta tokenCreateMeta = TOKEN_OPS_USAGE_UTILS.tokenCreateUsageFrom(txn);
+
+        assertEquals(1162, tokenCreateMeta.getBaseSize());
+        assertEquals(1_234_567L, tokenCreateMeta.getLifeTime());
+        assertEquals(TOKEN_NON_FUNGIBLE_UNIQUE_WITH_CUSTOM_FEES, tokenCreateMeta.getSubType());
+        assertEquals(1, tokenCreateMeta.getNumTokens());
+        assertEquals(0, tokenCreateMeta.getNftsTransfers());
+        assertEquals(0, tokenCreateMeta.getCustomFeeScheduleSize());
+    }
+
+    @Test
+    void testTokenCreateWithCustomFeesWork() {
+        final var txn = givenTokenCreateWith(FUNGIBLE_COMMON, false, true, false, true);
+
+        final var tokenCreateMeta = TOKEN_OPS_USAGE_UTILS.tokenCreateUsageFrom(txn);
+
+        assertEquals(1038, tokenCreateMeta.getBaseSize());
+        assertEquals(1_111_111L, tokenCreateMeta.getLifeTime());
+        assertEquals(TOKEN_FUNGIBLE_COMMON_WITH_CUSTOM_FEES, tokenCreateMeta.getSubType());
+        assertEquals(1, tokenCreateMeta.getNumTokens());
+        assertEquals(0, tokenCreateMeta.getNftsTransfers());
+        assertEquals(32, tokenCreateMeta.getCustomFeeScheduleSize());
+    }
+
     private TransactionBody givenTokenCreateWith(
             final TokenType type,
             final boolean withCustomFeesKey,

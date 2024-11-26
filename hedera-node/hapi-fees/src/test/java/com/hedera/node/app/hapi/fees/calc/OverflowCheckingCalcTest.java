@@ -134,6 +134,29 @@ class OverflowCheckingCalcTest {
         assertEquals(5, subject.safeAccumulateFour(1, 1, 1, 1, 1));
     }
 
+    @Test
+    void testConverterCanFallbackToBigDecimal() {
+        final var highFee = Long.MAX_VALUE / rateTinycentComponent;
+        final var expectedTinybarFee = FeeBuilder.getTinybarsFromTinyCents(someRate, highFee);
+
+        final long computedTinybarFee = OverflowCheckingCalc.tinycentsToTinybars(highFee, someRate);
+
+        assertEquals(expectedTinybarFee, computedTinybarFee);
+    }
+
+    @Test
+    void testSafeAccumulateThreeWorks() {
+        assertThrows(IllegalArgumentException.class, () -> subject.safeAccumulateThree(-1, 1, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> subject.safeAccumulateThree(1, -1, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> subject.safeAccumulateThree(1, 1, -1, 1));
+        assertThrows(IllegalArgumentException.class, () -> subject.safeAccumulateThree(1, 1, 1, -1));
+        assertThrows(IllegalArgumentException.class, () -> subject.safeAccumulateThree(1, Long.MAX_VALUE, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> subject.safeAccumulateThree(1, 1, Long.MAX_VALUE, 1));
+        assertThrows(IllegalArgumentException.class, () -> subject.safeAccumulateThree(1, 1, 1, Long.MAX_VALUE));
+
+        assertEquals(4, subject.safeAccumulateThree(1, 1, 1, 1));
+    }
+
     private static final long multiplier = 2L;
     private static final long veryHighFloorFee = Long.MAX_VALUE / 2;
     private static final FeeComponents mockLowCeilFees = FeeComponents.newBuilder()
